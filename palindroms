@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-unsigned long long count_even(const std::string& str) {
+unsigned long long _CountPalindromes(const std::string& str, int even) {
     std::vector<int> vec(str.size(), 0);
     unsigned long long counter = 0;
 
@@ -9,18 +9,20 @@ unsigned long long count_even(const std::string& str) {
     int right = -1;
 
     for (int i = 0; i < str.size(); ++i) {
-        int delta = std::max(1, std::min(vec[left + (right - i) - 1], right - i));
+        int delta = std::max(even, std::min(vec[left + (right - i) - even], right - i));
 
-        while ((i - delta + 1 >= 0) && (i + delta < str.size()) && (str[i - delta + 1] == str[i + delta])) {
+        while ((i - delta + 1 >= 0) && (i + delta < str.size()) && (str[i - delta + even] == str[i + delta])) {
             ++delta;
         }
-        --delta;
+
+        if (!even || delta > 0)
+            --delta;
 
         vec[i] = delta;
         counter += delta;
 
         if (i + delta > right) {
-            left = i - delta + 1;
+            left = i - delta + even;
             right = i + delta;
         }
     }
@@ -28,36 +30,9 @@ unsigned long long count_even(const std::string& str) {
     return counter;
 }
 
-unsigned long long count_odd(const std::string& str) {
-    std::vector<int> vec(str.size(), 0);
-    unsigned long long counter = 0;
 
-    int left = 0;
-    int right = -1;
-    for (int i = 0; i < str.size(); i++) {
-        int delta = std::max(0, std::min(vec[left + (right - i)], right - i));
-
-        while ((i - delta >= 0) && (i + delta < str.size()) && (str[i + delta] == str[i - delta])) {
-            ++delta;
-        }
-
-        if (delta > 0)
-            --delta;
-
-        vec[i] = delta;
-        counter += delta;
-
-        if (i + delta > right) {
-            left = i - delta;
-            right = i + delta;
-        }
-    }
-
-    return counter;
-};
-
-unsigned long long count_palindromes(const std::string& str) {
-    return count_odd(str) + count_even(str);
+unsigned long long CountPalindromes(const std::string& str) {
+    return _CountPalindromes(str, true) + _CountPalindromes(str, false);
 }
 
 
@@ -65,5 +40,6 @@ int main() {
     std::string line;
     std::cin >> line;
 
-    printf("%llu", count_palindromes(line));
+    printf("%llu", CountPalindromes(line));
 }
+
