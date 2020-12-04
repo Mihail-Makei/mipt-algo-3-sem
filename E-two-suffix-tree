@@ -1,0 +1,165 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <map>
+
+class SuffixTree {
+private:
+	struct vertex_t {
+        int left;
+        int right;
+        int link;
+        int parent;
+        std::map<char, int> next;
+
+        vertex_t(int l = -1, int r = -1, int par = -1) : left(l), right(r), parent(par), link(0) {}
+    };
+
+    struct state_t {
+        int node;
+        int pos;
+        state_t (int node, int pos) : node(node), pos(pos)  {}
+    };
+
+
+    size_t size;
+    int iterator;
+    int currentPos;
+    int sourceLen;
+    int firstLen;
+
+    std::vector<int> reNum;
+    std::string str;
+    std::vector<bool> visited;
+    std::vector<vertex_t> vertices;
+
+    state_t state;
+
+public:
+    
+    void buildTree() {
+        for (size_t i = 2; i < vertices.size(); ++i)
+            vertices[i].right = sourceLen - 1;
+
+        for (int i = 'a'; i <= 'z'; ++i)
+            vertices[1].next[i] = 0;
+
+        vertices[1].next['#'] = 0;
+        vertices[1].next['$'] = 0;
+        vertices[0].link = 1;
+
+        for (int i = 0; i < sourceLen; ++i) {
+            add_letter(str[i]);
+            ++currentPos;
+        }
+    }
+
+    SuffixTree(const std::string& source, int fLen) : firstLen(fLen), state(0, 0), str(source), size(2), currentPos(0), sourceLen(source.length()) {
+        vertices.resize(sourceLen * 2);
+        vertex_t root;
+        vertices[0] = root;
+
+        buildTree();
+    }
+
+
+    void add_letter (char ch) {
+        start:
+        if (state.pos > vertices[state.node].right) {
+            if (vertices[state.node].next.find(ch) == vertices[state.node].next.end()) {
+                vertices[state.node].next[ch] = size;
+                vertices[size].left = currentPos;
+                vertices[size++].parent = state.node;
+                state.node = vertices[state.node].link;
+                state.pos = vertices[state.node].right + 1;
+                goto start;
+            }
+
+            state.node = vertices[state.node].next[ch];
+            state.pos = vertices[state.node].left;
+        }
+
+        if ((state.pos == -1) || (str[state.pos] == ch))
+            ++state.pos;
+        else {
+            vertices[size] = vertex_t(vertices[state.node].left, state.pos - 1, vertices[state.node].parent);
+            vertices[size].next[str[state.pos]] = state.node;
+
+            vertices[size].next[ch] = size + 1;
+            vertices[size+1].left = currentPos;
+            vertices[size+1].parent = size;
+
+            vertices[state.node].left = state.pos;
+            vertices[state.node].parent = size;
+            vertices[vertices[size].parent].next[str[vertices[size].left] ] = size;
+
+            size += 2;
+
+            state.node = vertices[vertices[size-2].parent].link;
+            state.pos = vertices[size-2].left;
+
+            while (vertices[size-2].right >= state.pos) {
+                state.node = vertices[state.node].next[str[state.pos]];
+                state.pos += 1 + vertices[state.node].right - vertices[state.node].left;
+            }
+
+            if (state.pos == vertices[size-2].right + 1)
+                vertices[size-2].link = state.node;
+            else
+                vertices[size-2].link = size;
+
+            state.pos = vertices[state.node].right - (state.pos - vertices[size-2].right) + 2;
+            goto start;
+        }
+    }
+
+    void DFS (int vertexNum) {
+        visited[vertexNum] = true;
+    
+        if (vertexNum) {
+            reNum[vertexNum] = iterator;
+            ++iterator;
+
+        	printf("%d ", reNum[vertices[vertexNum].parent]);
+
+            if (vertices[vertexNum].left < firstLen)
+                printf("0 %d %d\n",
+                      vertices[vertexNum].left,
+                      (vertices[vertexNum].right < firstLen ? vertices[vertexNum].right + 1 : firstLen)
+                );
+            else
+            	printf("1 %d %d\n",
+                      vertices[vertexNum].left - firstLen,
+                      vertices[vertexNum].right - firstLen + 1
+                );
+        }
+
+        for (auto elem : vertices[vertexNum].next)
+            if (!visited[elem.second])
+                DFS(elem.second);
+    }
+
+    void print_answer() {
+        iterator = 1;
+        visited.resize(size, false);
+        reNum.resize(size, 0);
+        reNum[0] = 0;
+
+    	printf("%d\n", size - 1);
+
+        DFS(0);
+    }
+};
+
+
+int main() {
+    std::string str1, str2;
+    std::cin >> str1 >> str2;
+
+    int length = str1.length();
+
+    str1.append(str2);
+
+    SuffixTree tree(str1, length);
+    tree.print_answer();
+}
