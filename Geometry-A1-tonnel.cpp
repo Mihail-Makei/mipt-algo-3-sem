@@ -28,9 +28,9 @@ struct Segment3D {
     Vector3D begin;
     Vector3D end;
 
-	Segment3D() = default;
+    Segment3D() = default;
     Segment3D(const Vector3D& begin, const Vector3D& end): begin(begin), end(end) {};
-	friend std::istream& operator>> (std::istream& in, Segment3D& v);
+    friend std::istream& operator>> (std::istream& in, Segment3D& v);
 };
 
 
