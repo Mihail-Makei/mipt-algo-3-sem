@@ -5,14 +5,15 @@
 const double SMALL_NUM = 1e-7;
 
 struct Vector3D {
-    Vector3D(double x, double y, double z): x(x), y(y), z(z) {};
+    Vector3D(double x = 0, double y = 0, double z = 0): x(x), y(y), z(z) {};
 
     Vector3D operator-();
 
-    friend Vector3D operator*(double c, const Vector3D & v);
-    friend Vector3D operator+(const Vector3D & v1, const Vector3D & v2);
-    friend Vector3D operator-(const Vector3D & v1, const Vector3D & v2);
-    friend double operator*(const Vector3D & v1, const Vector3D & v2);
+    friend Vector3D operator*(double c, const Vector3D& v);
+    friend Vector3D operator+(const Vector3D& v1, const Vector3D& v2);
+    friend Vector3D operator-(const Vector3D& v1, const Vector3D& v2);
+    friend double operator*(const Vector3D& v1, const Vector3D& v2);
+    friend std::istream& operator>> (std::istream& in, Vector3D& v);
 
     double length();
 
@@ -27,7 +28,9 @@ struct Segment3D {
     Vector3D begin;
     Vector3D end;
 
+	Segment3D() = default;
     Segment3D(const Vector3D& begin, const Vector3D& end): begin(begin), end(end) {};
+	friend std::istream& operator>> (std::istream& in, Segment3D& v);
 };
 
 
@@ -37,17 +40,11 @@ double SegmentDist(const Segment3D& S1, const Segment3D& S2);
 
 
 int main() {
-    double x1 = 0, y1 = 0, z1 = 0;
-    double x2 = 0, y2 = 0, z2 = 0;
-    double x3 = 0, y3 = 0, z3 = 0, x4 = 0, y4 = 0, z4 = 0;
+    Segment3D s1, s2;
+    
+    std::cin >> s1 >> s2;    
 
-    scanf("%lf %lf %lf", &x1, &y1, &z1);
-    scanf("%lf %lf %lf", &x2, &y2, &z2);
-    scanf("%lf %lf %lf", &x3, &y3, &z3);
-    scanf("%lf %lf %lf", &x4, &y4, &z4);
-
-    printf("%.6f", SegmentDist(Segment3D(Vector3D(x1, y1, z1), Vector3D(x2, y2, z2)),
-                                        Segment3D(Vector3D(x3, y3, z3), Vector3D(x4, y4, z4))));
+    printf("%.6f", SegmentDist(s1, s2));
 }
 
 
@@ -60,13 +57,13 @@ Vector3D Vector3D::operator-() {
 
 
 
-Vector3D operator+(const Vector3D & v1, const Vector3D & v2) {
+Vector3D operator+(const Vector3D& v1, const Vector3D& v2) {
     return Vector3D(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 }
 
 
 
-Vector3D operator-(const Vector3D & v1, const Vector3D & v2) {
+Vector3D operator-(const Vector3D& v1, const Vector3D& v2) {
     return Vector3D(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
 }
 
@@ -77,16 +74,30 @@ double Vector3D::length() {
 }
 
 
-Vector3D operator*(double c, const Vector3D & v) {
+Vector3D operator*(double c, const Vector3D& v) {
     return Vector3D(c * v.x, c * v.y, c * v.z);
 }
 
-double operator*(const Vector3D &v1, const Vector3D &v2) {
+double operator*(const Vector3D& v1, const Vector3D& v2) {
     return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
-Vector3D operator/(double c, const Vector3D & v) {
+Vector3D operator/(double c, const Vector3D& v) {
     return Vector3D(c * v.x, c * v.y, c * v.z);
+}
+
+std::istream& operator>> (std::istream& in, Vector3D& v) {
+    in >> v.x;
+    in >> v.y;
+    in >> v.z;
+ 
+    return in;
+}
+
+std::istream& operator>> (std::istream& in, Segment3D& s) {
+    in >> s.begin >> s.end;
+ 
+    return in;
 }
 
 double SegmentDist(const Segment3D& S1, const Segment3D& S2) {
