@@ -84,29 +84,35 @@ public:
                 node *temp = curr->get_link(str[i]);
                 if (temp) {
                     curr = temp;
-                    goto process_string;
+                    break;
                 }
                 curr = curr->prev;
             }
 
-            curr = &root;
+            if (!curr) {
+                curr = &root;
+            }
 
-            process_string:
-            if (curr->is_terminal())
-                for (int j = i; j > i - (int) dict[curr->out].length(); --j)
+            if (curr->is_terminal()) {
+                for (int j = i; j > i - (int) dict[curr->out].length(); --j) {
                     vec[j] = true;
-            else {
-                node *temp_node = curr->suffix_link;
-                if (temp_node)
-                    for (int j = i; j > i - (int) dict[temp_node->out].length(); --j)
+                }
+            } else {
+                node* temp_node = curr->suffix_link;
+                if (temp_node) {
+                    for (int j = i; j > i - (int) dict[temp_node->out].length(); --j) {
                         vec[j] = true;
+                    }
+                }
             }
         }
 
         int counter = 0;
-        for (auto && i : vec)
-            if (!i)
+        for (auto && i : vec) {
+            if (!i) {
                 ++counter;
+            }
+        }
 
         return counter;
     }
