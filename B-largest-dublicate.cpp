@@ -124,8 +124,6 @@ int main() {
     std::string str;
     std::cin >> str;
 
-    str += '$';
-
     std::vector<int> suffix_arr = suffix_array(str);
     std::vector<int> lcp_arr = lcp_array(str, suffix_arr);
 
