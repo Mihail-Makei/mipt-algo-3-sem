@@ -17,12 +17,12 @@ private:
     public:
         explicit node(node* prev_node = NULL): prev(prev_node), suffix_link(NULL), out(-1) {}
 
-        node* get_link(char c) {
+        node* GetLink(char c) {
             auto iter = next.find(c);
             return iter != next.cend() ? iter->second : NULL;
         }
 
-        bool is_terminal() {
+        bool IsTerminal() {
             return out >= 0;
         }
     };
@@ -31,11 +31,11 @@ public:
     node root;
     std::vector<std::string> dict;
 
-    void add_string(const std::string& str) {
+    void AddString(const std::string& str) {
         node* curr = &root;
 
         for (char i : str) {
-            node *child = curr->get_link(i);
+            node *child = curr->GetLink(i);
             if (!child) {
                 child = new node(&root);
                 curr->next[i] = child;
@@ -47,7 +47,7 @@ public:
         dict.emplace_back(str);
     }
 
-    void build() {
+    void Build() {
         std::queue<node*> q;
         q.push(&root);
 
@@ -60,7 +60,7 @@ public:
 
                 node* temp_node = curr->prev;
                 while (temp_node) {
-                    node* prev_cd = temp_node->get_link(it->first);
+                    node* prev_cd = temp_node->GetLink(it->first);
                     if (prev_cd) {
                         child->prev = prev_cd;
                         break;
@@ -68,20 +68,20 @@ public:
                     temp_node = temp_node->prev;
                 }
 
-                child->suffix_link = child->prev->is_terminal() ? child->prev : child->prev->suffix_link;
+                child->suffix_link = child->prev->IsTerminal() ? child->prev : child->prev->suffix_link;
 
                 q.push(child);
             }
         }
     }
 
-    size_t count(const std::string& str) {
+    size_t Count(const std::string& str) {
         std::vector<bool> vec(str.length(), false);
 
         node* curr = &root;
         for (int i = 0; i < str.length(); ++i) {
             while (curr) {
-                node *temp = curr->get_link(str[i]);
+                node *temp = curr->GetLink(str[i]);
                 if (temp) {
                     curr = temp;
                     break;
@@ -93,7 +93,7 @@ public:
                 curr = &root;
             }
 
-            if (curr->is_terminal()) {
+            if (curr->IsTerminal()) {
                 for (int j = i; j > i - (int) dict[curr->out].length(); --j) {
                     vec[j] = true;
                 }
@@ -133,13 +133,13 @@ int main() {
 
     for (int i = 0; i < num; ++i) {
         std::cin >> str;
-        trie.add_string(str);
+        trie.AddString(str);
     }
 
-    trie.build();
+    trie.Build();
 
-    int count = trie.count(text);
-    std::cout << count << std::endl;
+    int counter = trie.Count(text);
+    std::cout << counter << std::endl;
 
     return 0;
 }
