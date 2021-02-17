@@ -4,7 +4,7 @@
 
 const int ALPHABET_SIZE = 200;
 
-std::vector<int> suffix_array(const std::string& str) {
+std::vector<int> SuffixArray(const std::string& str) {
     int len = str.length();
 
     std::vector<int> count(std::max(ALPHABET_SIZE, len), 0);
@@ -68,8 +68,8 @@ std::vector<int> suffix_array(const std::string& str) {
 
         for (int i = 1; i < len; ++i) {
             if (equiv_classes[suffix_arr[i]] != equiv_classes[suffix_arr[i-1]] ||
-                                equiv_classes[(suffix_arr[i] + (1 << deg)) % len] !=
-                                equiv_classes[(suffix_arr[i-1] + (1 << deg)) % len]) {
+                equiv_classes[(suffix_arr[i] + (1 << deg)) % len] !=
+                equiv_classes[(suffix_arr[i-1] + (1 << deg)) % len]) {
                 ++classes_num;
             }
             classes_temp[suffix_arr[i]] = classes_num - 1;
@@ -84,7 +84,7 @@ std::vector<int> suffix_array(const std::string& str) {
 }
 
 
-std::vector<int> lcp_array(const std::string& str, const std::vector<int>& suffix_arr) {
+std::vector<int> LCPArray(const std::string& str, const std::vector<int>& suffix_arr) {
     int len = suffix_arr.size();
 
     std::vector<int> lcp_arr(len, 0);
@@ -124,8 +124,8 @@ int main() {
     std::string str;
     std::cin >> str;
 
-    std::vector<int> suffix_arr = suffix_array(str);
-    std::vector<int> lcp_arr = lcp_array(str, suffix_arr);
+    std::vector<int> suffix_arr = SuffixArray(str);
+    std::vector<int> lcp_arr = LCPArray(str, suffix_arr);
 
     int maxlen = lcp_arr[0];
     for (int i = 1; i < lcp_arr.size(); ++i) {
