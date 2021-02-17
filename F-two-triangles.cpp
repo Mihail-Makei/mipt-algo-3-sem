@@ -45,7 +45,7 @@ bool intersect (segment s1, segment s2, point& p) {
     return p.x >= s1.begin.x - SMALL_NUM && p.x <= s1.end.x + SMALL_NUM && p.x >= s2.begin.x - SMALL_NUM && p.x <= s2.end.x + SMALL_NUM;
 }
 
-double segment_y (segment s, double x) {
+double SegmentY (segment s, double x) {
     return s.begin.y + (s.end.y - s.begin.y) * (x - s.begin.x) / (s.end.x - s.begin.x);
 }
 
@@ -55,20 +55,86 @@ struct section {
 };
 
 
-bool comp_sections(section a, section b) {
+bool CompSections(section a, section b) {
     return a.y1 < b.y1 - SMALL_NUM || abs(a.y1 - b.y1) < SMALL_NUM && a.y2 < b.y2 - SMALL_NUM;
 }
 
 
-bool comp_points(point a, point b) {
+bool CompPoints(point a, point b) {
     return a.x < b.x - SMALL_NUM;
 }
 
-bool intersections_equiv(point a, point b) {
+bool IntersectionsEquiv(point a, point b) {
     return fabs(a.x - b.x) < SMALL_NUM;
 }
 
-int main() {
+double CountSquare(const std::vector<point>& intersections, const std::vector<segment>& edges) {
+    double square = 0;
+    bool used[2] = {};
+
+    for (int i = 0; i + 1 < intersections.size(); ++i) {
+        double x1 = intersections[i].x,  x2 = intersections[i + 1].x;
+        std::vector<section> sections;
+
+        for (int j = 0; j < edges.size(); ++j) {
+            if (edges[j].begin.x != edges[j].end.x) {
+                if (edges[j].begin.x <= x1 && edges[j].end.x >= x2) {
+                    section sect = {SegmentY(edges[j], x1), SegmentY(edges[j], x2), static_cast<int>(j) / 3};
+                    sections.emplace_back(sect);
+                }
+            }
+        }
+
+        std::sort (sections.begin(), sections.end(), CompSections);
+
+        double mid_line = 0;
+        for (int j = 0; j < sections.size(); ) {
+            section lower = sections[j];
+            ++j;
+
+            used[lower.triangle_num] = true;
+            int counter = 1;
+
+            while (counter && j < sections.size()) {
+                used[sections[j].triangle_num] = !used[sections[j].triangle_num];
+
+                if (used[sections[j].triangle_num]) {
+                    ++counter;
+                } else {
+                    --counter;
+                }
+
+                ++j;
+            }
+            section upper = sections[j - 1];
+            mid_line += upper.y1 - lower.y1 + upper.y2 - lower.y2;
+        }
+        square += mid_line * (x2 - x1) / 2;
+    }
+
+    return square;
+}
+
+std::vector<point> FindIntersections(const std::vector<segment>& edges) {
+    std::vector<point> intersections;
+
+    for (int i = 0; i < edges.size(); ++i) {
+        for (int j = i + 1; j < edges.size(); ++j) {
+            point temp{};
+            if (intersect(edges[i], edges[j], temp)) {
+                intersections.emplace_back(temp);
+            }
+        }
+    }
+
+    std::sort(intersections.begin(), intersections.end(), CompPoints);
+    intersections.erase(std::unique(intersections.begin(), intersections.end(), IntersectionsEquiv), intersections.end());
+
+    return intersections;
+}
+
+
+std::vector<segment> InputEdges() {
     std::vector<segment> edges;
     for (int i = 0; i < 2; ++i) {
         point a{}, b{}, c{};
@@ -96,61 +162,15 @@ int main() {
         }
     }
 
-    std::vector<point> intersections;
-    for (int i = 0; i < edges.size(); ++i) {
-        for (int j = i + 1; j < edges.size(); ++j) {
-            point temp{};
-            if (intersect(edges[i], edges[j], temp)) {
-                intersections.emplace_back(temp);
-            }
-        }
-    }
+    return edges;
+}
 
-    std::sort(intersections.begin(), intersections.end(), comp_points);
-    intersections.erase(std::unique(intersections.begin(), intersections.end(), intersections_equiv), intersections.end());
+int main() {
+    std::vector<segment> edges = InputEdges();
 
-    double square = 0;
-    bool used[2] = {};
+    std::vector<point> intersections = FindIntersections(edges);
 
-    for (int i = 0; i + 1 < intersections.size(); ++i) {
-        double x1 = intersections[i].x,  x2 = intersections[i + 1].x;
-        std::vector<section> sections;
-
-        for (int j = 0; j < edges.size(); ++j) {
-            if (edges[j].begin.x != edges[j].end.x) {
-                if (edges[j].begin.x <= x1 && edges[j].end.x >= x2) {
-                    section sect = {segment_y(edges[j], x1), segment_y(edges[j], x2), static_cast<int>(j) / 3};
-                    sections.emplace_back(sect);
-                }
-            }
-        }
-
-        std::sort (sections.begin(), sections.end(), comp_sections);
-
-        double mid_line = 0;
-        for (int j = 0; j < sections.size(); ) {
-            section lower = sections[j];
-            ++j;
-
-            used[lower.triangle_num] = true;
-            int counter = 1;
-
-            while (counter && j < sections.size()) {
-                used[sections[j].triangle_num] = !used[sections[j].triangle_num];
-
-                if (used[sections[j].triangle_num]) {
-                    ++counter;
-                } else {
-                    --counter;
-                }
-
-                ++j;
-            }
-            section upper = sections[j - 1];
-            mid_line += upper.y1 - lower.y1 + upper.y2 - lower.y2;
-        }
-        square += mid_line * (x2 - x1) / 2;
-    }
+    double square = CountSquare(intersections, edges);
 
     printf("%.4lf\n", square);
 
