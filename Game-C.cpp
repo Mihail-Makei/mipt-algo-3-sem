@@ -10,10 +10,7 @@ int mex(const std::vector<int>& a) {
 }
 
 
-int main() {
-    int qlen = 0;
-    scanf("%d", &qlen);
-
+std::vector<int> gValues(int qlen) {
     std::vector<int> g(qlen + 1, 0);
     g[1] = 1;
     g[2] = 1;
@@ -31,7 +28,12 @@ int main() {
 
         g[i] = mex(temp);
     }
+    
+    return g;
+}
 
+
+void PrintAnswer(const std::vector<int>& g, int qlen) {
     if (g[qlen] == 0) {
         printf("Mueller\n");
     } else {
@@ -39,17 +41,17 @@ int main() {
 
         if (qlen == 2) {
             printf("1\n2\n");
-            return 0;
+            return;
         }
 
         if (qlen == 3) {
             printf("2\n");
-            return 0;
+            return;
         }
 
         if (qlen == 5) {
             printf("1\n3\n5\n");
-            return 0;
+            return;
         }
 
         if (g[qlen - 1] == 0) {
@@ -74,4 +76,16 @@ int main() {
             printf("%d\n", qlen);
         }
     }
+}
+
+
+int main() {
+    int qlen = 0;
+    scanf("%d", &qlen);
+
+    std::vector<int> g = gValues(qlen);
+
+    PrintAnswer(g, qlen);
+    
+    return 0;
 }
